@@ -1,0 +1,74 @@
+import numpy as np
+class ART1:
+def __init__(self, n_features, vigilance=0.7):
+self.n_features = n_features
+self.vigilance = vigilance
+self.weights = [] # list of category weight vectors
+
+def _choice_function(self, x, w):
+return np.dot(x, w) / (0.5 + np.sum(w))
+
+def _match_function(self, x, w):
+return np.dot(x, w) / np.sum(x)
+
+def train(self, X):
+for i, x in enumerate(X):
+if len(self.weights) == 0:
+self.weights.append(x.copy())
+print(f"Pattern {i} assigned to new cluster 0")
+continue
+
+T = [self._choice_function(x, w) for w in self.weights]
+
+while True:
+j = np.argmax(T)
+match = self._match_function(x, self.weights[j])
+
+if match >= self.vigilance:
+# Update weights (AND operation)
+self.weights[j] = np.minimum(x, self.weights[j])
+print(f"Pattern {i} assigned to cluster {j}")
+break
+else:
+T[j] = -1 # disable this category
+if max(T) == -1:
+self.weights.append(x.copy())
+print(f"Pattern {i} assigned to new cluster
+
+{len(self.weights)-1}")
+break
+
+def predict(self, X):
+labels = []
+for x in X:
+T = [self._choice_function(x, w) for w in self.weights]
+
+j = np.argmax(T)
+labels.append(j)
+return labels
+
+# =========================
+# SAMPLE DATA (binary patterns)
+# =========================
+X = np.array([
+[1, 1, 0, 0],
+[1, 1, 0, 1],
+[0, 0, 1, 1],
+[0, 0, 1, 0],
+[1, 0, 0, 0]
+])
+
+# =========================
+# TRAIN ART1 NETWORK
+# =========================
+art = ART1(n_features=4, vigilance=0.6)
+art.train(X)
+
+# =========================
+# PREDICTION
+# =========================
+labels = art.predict(X)
+
+print("\nFinal cluster assignments:")
+for i, label in enumerate(labels):
+print(f"Pattern {i}: Cluster {label}")
